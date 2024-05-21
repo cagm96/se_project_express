@@ -11,4 +11,9 @@ const getUsers = (req, res) => {
     });
 };
 
+const createUser = (req, res) => {
+  const { name, avatar } = req.body;
+  console.log(name, avatar);
+};
+
 module.exports = { getUsers };
