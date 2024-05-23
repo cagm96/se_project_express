@@ -11,8 +11,11 @@ mongoose
     console.log("Connected to DB");
   })
   .catch((e) => console.error(e));
-
+app.use(express.json());
 app.use("/", mainRouter);
+
+const routes = require("./routes");
+app.use(routes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
