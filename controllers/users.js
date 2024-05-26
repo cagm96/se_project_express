@@ -10,10 +10,27 @@ const getUsers = (req, res) => {
       return res.status(500).send({ message: err.message });
     });
 };
-const getUser = (req, res) => {};
+const getUser = (req, res) => {
+  User.find(req.params.id)
+    .then((users) => {
+      res.send(users);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).send({ message: err.message });
+    });
+};
 const createUser = (req, res) => {
   const { name, avatar, about } = req.body;
   console.log(name, avatar, about);
+  User.create({ name, avatar, about })
+    .then((users) => {
+      res.send(users);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports = { getUsers, getUser, createUser };
