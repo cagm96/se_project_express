@@ -12,8 +12,8 @@ const getUsers = (req, res) => {
 };
 const getUser = (req, res) => {};
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  console.log(name, avatar);
+  const { name, avatar, about } = req.body;
+  console.log(name, avatar, about);
 };
 
 module.exports = { getUsers, getUser, createUser };
