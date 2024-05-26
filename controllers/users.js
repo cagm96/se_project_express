@@ -10,10 +10,10 @@ const getUsers = (req, res) => {
       return res.status(500).send({ message: err.message });
     });
 };
-
+const getUser = (req, res) => {};
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
   console.log(name, avatar);
 };
 
-module.exports = { getUsers };
+module.exports = { getUsers, getUser, createUser };

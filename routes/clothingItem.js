@@ -21,4 +21,4 @@ router.put("/:itemId", updateItem);
 //Delete
 router.delete("/:itemId", deleteItem);
 
-router.module.exports = router;
+module.exports = router;
