@@ -52,9 +52,44 @@ const deleteItem = (req, res) => {
       res.status(500).send({ message: "Error from deleteItem" });
     });
 };
+
+const createClothingItem = (req, res) => {
+  console.log(req.user._id);
+  // This is only a temporary solution. We've hardcoded the user ID,
+  //so the item will have the same author in the database regardless
+  //of who actually created it. That's okay for now, and we'll
+  //fix it in the next sprint.
+};
+
+const likeItem = (req, res) => {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    {
+      $addToSet: { likes: req.user._id },
+    }, // add _id to the array if it's not there yet
+    { new: true }
+  );
+};
+
+const dislikeItem = (req, res) => {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } }, // remove _id from the array
+    { new: true }
+  );
+};
+
+// Notice that we are passing the {new: true} option to the method.
+// We need to set it to return the document after update was applied.
+// If we didn't, the update methods would return a pre-update result
+// in the service response, giving the impression that the methods
+//  are not working.
+
 module.exports = {
   createItem,
   getItems,
   updateItem,
   deleteItem,
+  createClothingItem,
+  likeItem,
 };

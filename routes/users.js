@@ -1,11 +1,11 @@
 const router = require("express").Router();
-const app = express();
+
 const { getUsers, getUser, createUser } = require("../controllers/users");
 
 router.get("/", getUsers);
 router.get("/:userID", getUser);
 router.post("/", createUser);
-app.use((req, res, next) => {
+router.use((req, res, next) => {
   console.log(res);
 });
 
