@@ -17,6 +17,13 @@ app.use("/", mainRouter);
 const routes = require("./routes");
 app.use(routes);
 
+app.use((req, res, next) => {
+  req.user = {
+    _id: "665380762aea4eb6de7e5965",
+  };
+  next();
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

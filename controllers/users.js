@@ -11,9 +11,10 @@ const getUsers = (req, res) => {
     });
 };
 const getUser = (req, res) => {
-  User.find(req.params.id)
-    .then((users) => {
-      res.send(users);
+  console.log(req.params.userID);
+  User.findById(req.params.userID)
+    .then((user) => {
+      res.send({ data: user });
     })
     .catch((err) => {
       console.log(err);
