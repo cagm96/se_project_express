@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const { user } = require("./user");
+const { Schema } = mongoose;
 
 const clothingItem = new mongoose.Schema({
   name: {
@@ -19,17 +21,17 @@ const clothingItem = new mongoose.Schema({
     },
   },
   owner: {
-    //a link to the item author's model of the ObjectId type,
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "Author", // assuming 'Author' is the name of the model you're referencing
     required: true,
   },
   likes: {
-    // a list of users who liked the item,
-    //an ObjectId array with a reference to the user modal (empty by default)
+    type: [{ type: Schema.Types.ObjectId, ref: "User" }], // referencing the 'User' model
+    default: [], // default to an empty array
   },
   createdAt: {
-    //the item creation date,
-    //a field with the Date type and the default value Date.now
+    type: Date,
+    default: Date.now, // setting default value to the current date
   },
 });
 
