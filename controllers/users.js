@@ -11,7 +11,7 @@ const getUsers = (req, res) => {
     });
 };
 const getUser = (req, res) => {
-  console.log(req.params.userID);
+  console.log("user id: ", req.params.userID);
   User.findById(req.params.userID)
     .then((user) => {
       res.send({ data: user });
@@ -23,7 +23,7 @@ const getUser = (req, res) => {
 };
 const createUser = (req, res) => {
   const { name, avatar, about } = req.body;
-  console.log(name, avatar, about);
+  console.log("name: ", name, "avatar: ", avatar, "about: ", about);
   User.create({ name, avatar, about })
     .then((users) => {
       res.send(users);

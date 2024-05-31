@@ -2,8 +2,8 @@ const ClothingItem = require("../models/clothingItem");
 const { findByIdAndUpdate } = require("../models/user");
 
 const createItem = (req, res) => {
-  console.log(req.user);
-  // console.log(req.body);
+  console.log("user: ", req.user);
+  console.log("The req body: ", req.body);
 
   const { name, weather, imageURL } = req.body;
 
@@ -11,10 +11,10 @@ const createItem = (req, res) => {
     name: name,
     weather: weather,
     imageURL: imageURL,
-    owner: req.user,
+    owner: req.user._id,
   })
     .then((item) => {
-      //console.log(item);
+      console.log("clothing item: ", item);
       res.send({ data: item });
     })
     .catch((e) => {
@@ -46,21 +46,13 @@ const updateItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  console.log(itemId);
+  console.log("clothing item id: ", itemId);
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
     .then((item) => res.status(204).send({}))
     .catch((e) => {
       res.status(500).send({ message: "Error from deleteItem" });
     });
-};
-
-const createClothingItem = (req, res) => {
-  console.log(req.user._id);
-  // This is only a temporary solution. We've hardcoded the user ID,
-  //so the item will have the same author in the database regardless
-  //of who actually created it. That's okay for now, and we'll
-  //fix it in the next sprint.
 };
 
 const likeItem = (req, res) => {
@@ -92,7 +84,6 @@ module.exports = {
   getItems,
   updateItem,
   deleteItem,
-  createClothingItem,
   likeItem,
   dislikeItem,
 };
