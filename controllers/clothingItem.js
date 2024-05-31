@@ -11,7 +11,7 @@ const createItem = (req, res) => {
     name: name,
     weather: weather,
     imageURL: imageURL,
-    owner: req.user._id,
+    owner: req.user,
   })
     .then((item) => {
       console.log("clothing item: ", item);
