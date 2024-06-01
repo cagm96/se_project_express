@@ -1,4 +1,9 @@
 const User = require("../models/user");
+const {
+  invalid_data_400,
+  item_notFound_404,
+  default_error_500,
+} = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -7,7 +12,7 @@ const getUsers = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(default_error_500).send({ message: err.message });
     });
 };
 const getUser = (req, res) => {
@@ -18,7 +23,7 @@ const getUser = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(default_error_500).send({ message: err.message });
     });
 };
 const createUser = (req, res) => {
@@ -30,7 +35,7 @@ const createUser = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(default_error_500).send({ message: err.message });
     });
 };
 

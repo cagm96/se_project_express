@@ -1,16 +1,21 @@
 const ClothingItem = require("../models/clothingItem");
 const { findByIdAndUpdate } = require("../models/user");
+const {
+  invalid_data_400,
+  item_notFound_404,
+  default_error_500,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   console.log("user: ", req.user);
   console.log("The req body: ", req.body);
 
-  const { name, weather, imageURL } = req.body;
+  const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({
     name: name,
     weather: weather,
-    imageURL: imageURL,
+    imageUrl: imageUrl,
     owner: req.user._id,
   })
     .then((item) => {
@@ -18,9 +23,10 @@ const createItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((e) => {
-      res.status(500).send({ message: "Error from createItem", e });
+      res
+        .status(default_error_500)
+        .send({ message: "Error from createItem", e });
     });
-  res.end();
 };
 
 const getItems = (req, res) => {
@@ -33,13 +39,15 @@ const getItems = (req, res) => {
 
 const updateItem = (req, res) => {
   const { itemId } = req.params;
-  const { imageURL } = req.body;
+  const { imageUrl } = req.body;
 
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageURL } })
+  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
     .orFail()
     .then((item) => res.status(200).send({ data: item }))
     .catch((e) => {
-      res.status(500).send({ message: "Error from updateItems", e });
+      res
+        .status(default_error_500)
+        .send({ message: "Error from updateItems", e });
     });
 };
 
@@ -51,7 +59,7 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => res.status(204).send({}))
     .catch((e) => {
-      res.status(500).send({ message: "Error from deleteItem" });
+      res.status(default_error_500).send({ message: "Error from deleteItem" });
     });
 };
 
