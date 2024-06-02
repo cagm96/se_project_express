@@ -7,6 +7,11 @@ const {
 
 const getUsers = (req, res) => {
   User.find({})
+    .orFail(() => {
+      const error = new Error("Users ID not found");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((users) => {
       res.send(users);
     })
@@ -18,6 +23,11 @@ const getUsers = (req, res) => {
 const getUser = (req, res) => {
   console.log("user id: ", req.params.userID);
   User.findById(req.params.userID)
+    .orFail(() => {
+      const error = new Error("User ID not found");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((user) => {
       res.send({ data: user });
     })

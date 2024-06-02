@@ -27,13 +27,17 @@ const createItem = (req, res) => {
 
       res
         .status(default_error_500)
-        .send({ message: "Error from createItem", e });
+        .send({ message: "Error from createItem", err });
     });
 };
 
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((items) => res.status(200).send(items))
     .catch((e) => {
       res.status(500).send({ message: "Error from getItems", e });
@@ -45,7 +49,11 @@ const updateItem = (req, res) => {
   const { imageUrl } = req.body;
 
   ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((item) => res.status(200).send({ data: item }))
     .catch((e) => {
       res
@@ -59,10 +67,17 @@ const deleteItem = (req, res) => {
 
   console.log("clothing item id: ", itemId);
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then((item) => res.status(204).send({}))
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = 404;
+      throw error;
+    })
+    .then(() => res.status(204).send())
     .catch((e) => {
-      res.status(default_error_500).send({ message: "Error from deleteItem" });
+      const statusCode = e.statusCode || 500;
+      res
+        .status(statusCode)
+        .send({ message: e.message || "Error from deleteItem" });
     });
 };
 
@@ -73,7 +88,19 @@ const likeItem = (req, res) => {
       $addToSet: { likes: req.user._id },
     }, // add _id to the array if it's not there yet
     { new: true }
-  );
+  )
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = 404;
+      throw error;
+    })
+    .then(() => res.status(204).send())
+    .catch((e) => {
+      const statusCode = e.statusCode || 500;
+      res
+        .status(statusCode)
+        .send({ message: e.message || "Error from likeItem" });
+    });
 };
 
 const dislikeItem = (req, res) => {
@@ -81,7 +108,19 @@ const dislikeItem = (req, res) => {
     req.params.itemId,
     { $pull: { likes: req.user._id } }, // remove _id from the array
     { new: true }
-  );
+  )
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = 404;
+      throw error;
+    })
+    .then(() => res.status(204).send())
+    .catch((e) => {
+      const statusCode = e.statusCode || 500;
+      res
+        .status(statusCode)
+        .send({ message: e.message || "Error from dislikeItem" });
+    });
 };
 
 // Notice that we are passing the {new: true} option to the method.
