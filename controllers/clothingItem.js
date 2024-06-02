@@ -94,8 +94,9 @@ const likeItem = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then(() => res.status(204).send())
+    .then(() => res.status(204).send({ data: item }))
     .catch((e) => {
+      console.log("Error from likeItem: ", e);
       const statusCode = e.statusCode || 500;
       res
         .status(statusCode)
