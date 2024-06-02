@@ -22,7 +22,9 @@ const createItem = (req, res) => {
       console.log("clothing item: ", item);
       res.send({ data: item });
     })
-    .catch((e) => {
+    .catch((err) => {
+      console.log(err);
+
       res
         .status(default_error_500)
         .send({ message: "Error from createItem", e });
@@ -31,6 +33,7 @@ const createItem = (req, res) => {
 
 const getItems = (req, res) => {
   ClothingItem.find({})
+    .orFail()
     .then((items) => res.status(200).send(items))
     .catch((e) => {
       res.status(500).send({ message: "Error from getItems", e });
