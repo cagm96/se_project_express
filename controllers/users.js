@@ -44,8 +44,11 @@ const createUser = (req, res) => {
       res.send(users);
     })
     .catch((err) => {
-      console.log(err);
-      return res.status(default_error_500).send({ message: err.message });
+      console.error("createrUser error name: ", err.name);
+      if (err.name === "ValidatorError: Path `name` is required.") {
+        return res.status(400).send({ message: err.message });
+      }
+      //return res.status(default_error_500).send({ message: err.message });
     });
 };
 

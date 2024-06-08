@@ -20,7 +20,6 @@ const userSchema = new mongoose.Schema({
   },
   about: {
     type: String,
-    required: [true, "The about field is required"],
   },
 });
 
