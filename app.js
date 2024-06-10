@@ -11,6 +11,7 @@ mongoose
     console.log("Connected to DB");
   })
   .catch((e) => console.error(e));
+mongoose.set("strictQuery", true);
 
 app.use(express.json());
 

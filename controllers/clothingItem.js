@@ -23,8 +23,17 @@ const createItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((err) => {
-      console.error("createItem error: ", err);
-
+      console.error("createItem error: ", err.name);
+      if (err.name === "ValidationError") {
+        return res
+          .status(400)
+          .send({ message: "Invalid data: " + err.message });
+      }
+      if (err.name === "AssertionError") {
+        return res
+          .status(400)
+          .send({ message: "Invalid data: " + err.message });
+      }
       return res
         .status(default_error_500)
         .send({ message: "Error from createItem", err });
@@ -39,8 +48,9 @@ const getItems = (req, res) => {
       throw error;
     })
     .then((items) => res.status(200).send(items))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from getItems", e });
+    .catch((err) => {
+      console.error("getItems error name: ", err.name);
+      res.status(500).send({ message: "Error from getItems", err });
     });
 };
 
@@ -72,12 +82,19 @@ const deleteItem = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then(() => res.status(204).send())
-    .catch((e) => {
-      const statusCode = e.statusCode || 500;
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.error("deleteItem error name: ", err.name);
+      const statusCode = err.statusCode || 500;
+
+      if (err.name === "CastError") {
+        return res
+          .status(400)
+          .send({ message: "Invalid data: " + err.message });
+      }
       return res
         .status(statusCode)
-        .send({ message: e.message || "Error from deleteItem" });
+        .send({ message: err.message || "Error from deleteItem" });
     });
 };
 
@@ -95,12 +112,23 @@ const likeItem = (req, res) => {
       throw error;
     })
     .then(() => res.status(204).send({ data: item }))
-    .catch((e) => {
-      console.log("Error from likeItem: ", e);
-      const statusCode = e.statusCode || 500;
+    .catch((err) => {
+      console.log("Error from likeItem: ", err.name);
+      const statusCode = err.statusCode || 500;
+
+      if (err.name === "ReferenceError") {
+        return res
+          .status(200)
+          .send({ message: "Invalid data: " + err.message });
+      }
+      if (err.name === "CastError") {
+        return res
+          .status(400)
+          .send({ message: "Invalidad data: " + err.message });
+      }
       return res
         .status(statusCode)
-        .send({ message: e.message || "Error from likeItem" });
+        .send({ message: err.message || "Error from likeItem" });
     });
 };
 
@@ -115,12 +143,19 @@ const dislikeItem = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then(() => res.status(204).send())
-    .catch((e) => {
-      const statusCode = e.statusCode || 500;
+    .then((item) => res.status(200).send({ data: item }))
+    .catch((err) => {
+      console.error("dislikeItem error name: ", err.name);
+      const statusCode = err.statusCode || 500;
+
+      if (err.name === "CastError") {
+        return res
+          .status(400)
+          .send({ message: "Invalidad data: " + err.message });
+      }
       return res
         .status(statusCode)
-        .send({ message: e.message || "Error from dislikeItem" });
+        .send({ message: err.message || "Error from dislikeItem" });
     });
 };
 

@@ -6,7 +6,9 @@ const { Schema } = mongoose;
 const clothingItem = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Name is required"],
+    minlength: [2, "Name must be at least 2 characters long"],
+    maxlength: [30, "Name bust be no more than 30 characters long"],
   },
   weather: {
     type: String,
@@ -26,7 +28,7 @@ const clothingItem = new mongoose.Schema({
     required: true,
   },
   likes: {
-    type: [{ type: Schema.Types.ObjectId, ref: "User" }], // referencing the 'User' model
+    type: [{ type: Schema.Types.ObjectId, ref: "user" }], // referencing the 'User' model
     default: [], // default to an empty array
   },
   createdAt: {
