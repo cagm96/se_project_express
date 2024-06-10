@@ -7,8 +7,8 @@ const {
 } = require("../utils/errors");
 
 const createItem = (req, res) => {
-  console.log("user: ", req.user);
-  console.log("The req body: ", req.body);
+  // console.log("user: ", req.user);
+  // console.log("The req body: ", req.body);
 
   const { name, weather, imageUrl } = req.body;
 
@@ -19,13 +19,13 @@ const createItem = (req, res) => {
     owner: req.user._id,
   })
     .then((item) => {
-      console.log("clothing item: ", item);
+      // console.log("clothing item: ", item);
       res.send({ data: item });
     })
     .catch((err) => {
-      console.log(err);
+      console.error("createItem error: ", err);
 
-      res
+      return res
         .status(default_error_500)
         .send({ message: "Error from createItem", err });
     });
@@ -56,7 +56,7 @@ const updateItem = (req, res) => {
     })
     .then((item) => res.status(200).send({ data: item }))
     .catch((e) => {
-      res
+      return res
         .status(default_error_500)
         .send({ message: "Error from updateItems", e });
     });
@@ -75,7 +75,7 @@ const deleteItem = (req, res) => {
     .then(() => res.status(204).send())
     .catch((e) => {
       const statusCode = e.statusCode || 500;
-      res
+      return res
         .status(statusCode)
         .send({ message: e.message || "Error from deleteItem" });
     });
@@ -98,7 +98,7 @@ const likeItem = (req, res) => {
     .catch((e) => {
       console.log("Error from likeItem: ", e);
       const statusCode = e.statusCode || 500;
-      res
+      return res
         .status(statusCode)
         .send({ message: e.message || "Error from likeItem" });
     });
@@ -118,7 +118,7 @@ const dislikeItem = (req, res) => {
     .then(() => res.status(204).send())
     .catch((e) => {
       const statusCode = e.statusCode || 500;
-      res
+      return res
         .status(statusCode)
         .send({ message: e.message || "Error from dislikeItem" });
     });
