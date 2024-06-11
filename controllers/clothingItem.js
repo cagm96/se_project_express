@@ -29,46 +29,19 @@ const createItem = (req, res) => {
           .status(400)
           .send({ message: "Invalid data: " + err.message });
       }
-      if (err.name === "AssertionError") {
-        return res
-          .status(400)
-          .send({ message: "Invalid data: " + err.message });
-      }
+
       return res
         .status(default_error_500)
-        .send({ message: "Error from createItem", err });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .orFail(() => {
-      const error = new Error("Item ID not found");
-      error.statusCode = 404;
-      throw error;
-    })
     .then((items) => res.status(200).send(items))
     .catch((err) => {
       console.error("getItems error name: ", err.name);
-      res.status(500).send({ message: "Error from getItems", err });
-    });
-};
-
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail(() => {
-      const error = new Error("Item ID not found");
-      error.statusCode = 404;
-      throw error;
-    })
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      return res
-        .status(default_error_500)
-        .send({ message: "Error from updateItems", e });
+      res.status(500).send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -88,13 +61,11 @@ const deleteItem = (req, res) => {
       const statusCode = err.statusCode || 500;
 
       if (err.name === "CastError") {
-        return res
-          .status(400)
-          .send({ message: "Invalid data: " + err.message });
+        return res.status(400).send({ message: "Error from deleteItem" });
       }
       return res
         .status(statusCode)
-        .send({ message: err.message || "Error from deleteItem" });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -116,19 +87,12 @@ const likeItem = (req, res) => {
       console.log("Error from likeItem: ", err.name);
       const statusCode = err.statusCode || 500;
 
-      if (err.name === "ReferenceError") {
-        return res
-          .status(200)
-          .send({ message: "Invalid data: " + err.message });
-      }
       if (err.name === "CastError") {
-        return res
-          .status(400)
-          .send({ message: "Invalidad data: " + err.message });
+        return res.status(400).send({ message: "Error form likeItem " });
       }
       return res
         .status(statusCode)
-        .send({ message: err.message || "Error from likeItem" });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -149,13 +113,11 @@ const dislikeItem = (req, res) => {
       const statusCode = err.statusCode || 500;
 
       if (err.name === "CastError") {
-        return res
-          .status(400)
-          .send({ message: "Invalidad data: " + err.message });
+        return res.status(400).send({ message: "Error from dislikeItem" });
       }
       return res
         .status(statusCode)
-        .send({ message: err.message || "Error from dislikeItem" });
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -168,7 +130,6 @@ const dislikeItem = (req, res) => {
 module.exports = {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
   likeItem,
   dislikeItem,

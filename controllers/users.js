@@ -7,17 +7,14 @@ const {
 
 const getUsers = (req, res) => {
   User.find({})
-    .orFail(() => {
-      // const error = new Error("Users ID not found");
-      // error.statusCode = 400;
-      // throw error;
-    })
     .then((users) => {
       res.send(users);
     })
     .catch((err) => {
       console.error("getUsers error name", err.name);
-      return res.status(default_error_500).send({ message: err.message });
+      return res
+        .status(default_error_500)
+        .send({ message: "An error has occurred on the server." });
     });
 };
 const getUser = (req, res) => {
@@ -39,21 +36,16 @@ const getUser = (req, res) => {
       if (err.name === "Error") {
         return res.status(item_notFound_404).send({ message: err.message });
       }
-      return res.status(default_error_500).send({ message: err.message });
+      return res
+        .status(default_error_500)
+        .send({ message: "An error has occurred on the server." });
     });
 };
 const createUser = (req, res) => {
   const { name, avatar, about } = req.body;
-  console.log(
-    "Creating user with name:",
-    name,
-    "avatar:",
-    avatar,
-    "about:",
-    about
-  );
+  console.log("Creating user with name:", name, "avatar:", avatar);
 
-  User.create({ name, avatar, about })
+  User.create({ name, avatar })
     .then((user) => {
       res.send({ data: user });
     })
@@ -64,7 +56,9 @@ const createUser = (req, res) => {
           .status(400)
           .send({ message: "Invalid data: " + err.message });
       }
-      return res.status(default_error_500).send({ message: err.message });
+      return res
+        .status(default_error_500)
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
