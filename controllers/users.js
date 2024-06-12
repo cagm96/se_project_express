@@ -1,8 +1,8 @@
 const User = require("../models/user");
 const {
-  invalid_data_400,
-  item_notFound_404,
-  default_error_500,
+  invalid_Data_400,
+  item_NotFound_404,
+  default_Error_500,
 } = require("../utils/errors");
 
 const getUsers = (req, res) => {
@@ -13,7 +13,7 @@ const getUsers = (req, res) => {
     .catch((err) => {
       console.error("getUsers error name", err.name);
       return res
-        .status(default_error_500)
+        .status(default_Error_500)
         .send({ message: "An error has occurred on the server." });
     });
 };
@@ -31,13 +31,13 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error("getUser error name is: ", err.name);
       if (err.name === "CastError") {
-        return res.status(400).send({ message: err.message });
+        return res.status(invalid_Data_400).send({ message: err.message });
       }
       if (err.name === "Error") {
-        return res.status(item_notFound_404).send({ message: err.message });
+        return res.status(item_NotFound_404).send({ message: err.message });
       }
       return res
-        .status(default_error_500)
+        .status(default_Error_500)
         .send({ message: "An error has occurred on the server." });
     });
 };
@@ -53,11 +53,11 @@ const createUser = (req, res) => {
       console.error("createUser error name:", err.name);
       if (err.name === "ValidationError") {
         return res
-          .status(400)
+          .status(invalid_Data_400)
           .send({ message: "Invalid data: " + err.message });
       }
       return res
-        .status(default_error_500)
+        .status(default_Error_500)
         .send({ message: "An error has occurred on the server." });
     });
 };

@@ -18,9 +18,6 @@ const userSchema = new mongoose.Schema({
       message: "You must enter a valid URL",
     },
   },
-  about: {
-    type: String,
-  },
 });
 
 module.exports = mongoose.model("user", userSchema);
