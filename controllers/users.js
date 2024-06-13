@@ -31,7 +31,7 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error("getUser error name is: ", err.name);
       if (err.name === "CastError") {
-        return res.status(invalidData400).send({ message: err.message });
+        return res.status(invalidData400).send({ message: "Invalid ID" });
       }
       if (err.name === "Error") {
         return res.status(itemNotFound404).send({ message: err.message });
@@ -52,9 +52,7 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error("createUser error name:", err.name);
       if (err.name === "ValidationError") {
-        return res
-          .status(invalidData400)
-          .send({ message: "Invalid data", details: err.message });
+        return res.status(invalidData400).send({ message: "Invalid data" });
       }
       return res
         .status(defaultError500)
