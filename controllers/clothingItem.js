@@ -18,7 +18,9 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error("createItem error: ", err.name);
       if (err.name === "ValidationError") {
-        return res.status(invalidData400).send("Invalid data: ", err.message);
+        return res
+          .status(invalidData400)
+          .send({ message: "Invalid data", details: err.message });
       }
 
       return res
@@ -77,7 +79,7 @@ const likeItem = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then((item) => res.status(204).send({ data: item }))
+    .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       console.log("Error from likeItem: ", err.name);
       const statusCode = err.statusCode || 500;
