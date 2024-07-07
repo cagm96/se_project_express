@@ -5,7 +5,7 @@ const {
   itemNotFound404,
   defaultError500,
 } = require("../utils/errors");
-
+const { JWT_SECRET } = require("../utils/errors");
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
@@ -43,6 +43,13 @@ const getUser = (req, res) => {
     });
 };
 const createUser = (req, res) => {
+  //1.  Check that there's not already an existing user with an email matching the one contained
+  // in the request body.
+  //2.  Since the email field is set as required in the user schema,
+  // the User.create() function will throw a 11000 error (a MongoDB duplicate error).
+  // Handle this error code in a throw block and return a corresponding error message.
+  //3.  Make sure that passwords are hashed before being saved to the database.
+
   const { name, avatar, email, password } = req.body;
   console.log(
     "Creating user with name:",
@@ -93,8 +100,12 @@ const login = (req, res) => {
       // Only the _id property containing the user's identifier should be written
       // to the token payload:
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        //JWT_SECRET contains a value of your secret key for the signature
         expiresIn: "7d",
       });
+      //Once the JWT has been created, it should be sent to
+      //the client in the response body
+      res.send({ token });
     })
     .catch((err) => {
       // authentication error
@@ -103,20 +114,6 @@ const login = (req, res) => {
 
       res.status(401).send({ message: err.message });
     });
-
-  //JWT_SECRET contains a value of your secret key for the signature.
-  // Declare it in a separate file, such as utils/config.js. Later,
-  //we will hide the key from other developers.
-
-  //Once the JWT has been created, it should be sent to the client.
-  //We recommend doing this in the response body.
 };
-
-//1.  Check that there's not already an existing user with an email matching the one contained
-// in the request body.
-//2.  Since the email field is set as required in the user schema,
-// the User.create() function will throw a 11000 error (a MongoDB duplicate error).
-// Handle this error code in a throw block and return a corresponding error message.
-//3.  Make sure that passwords are hashed before being saved to the database.
 
 module.exports = { getUsers, getUser, createUser, login };
