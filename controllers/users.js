@@ -80,6 +80,38 @@ const createUser = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  //  controller that gets the email and password from the request
+  //  and authenticates them.
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // authentication successful! user is in the user variable
+      // If the email and password are correct, the controller should create a
+      // JSON web token (JWT) that expires after a week.
+      // Only the _id property containing the user's identifier should be written
+      // to the token payload:
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+    })
+    .catch((err) => {
+      // authentication error
+      // If the email and password are incorrect,
+      // the controller should return a 401 error.
+
+      res.status(401).send({ message: err.message });
+    });
+
+  //JWT_SECRET contains a value of your secret key for the signature.
+  // Declare it in a separate file, such as utils/config.js. Later,
+  //we will hide the key from other developers.
+
+  //Once the JWT has been created, it should be sent to the client.
+  //We recommend doing this in the response body.
+};
+
 //1.  Check that there's not already an existing user with an email matching the one contained
 // in the request body.
 //2.  Since the email field is set as required in the user schema,
@@ -87,4 +119,4 @@ const createUser = (req, res) => {
 // Handle this error code in a throw block and return a corresponding error message.
 //3.  Make sure that passwords are hashed before being saved to the database.
 
-module.exports = { getUsers, getUser, createUser };
+module.exports = { getUsers, getUser, createUser, login };
