@@ -54,11 +54,11 @@ const createUser = (req, res) => {
   console.log(
     "Creating user with name:",
     name,
-    "avatar:",
+    ", avatar:",
     avatar,
-    "password:",
+    ", password:",
     password,
-    "email:",
+    ", email:",
     email
   );
 
@@ -72,6 +72,7 @@ const createUser = (req, res) => {
             res.send({ data: user });
           });
       }
+      next();
     })
     .catch((err) => {
       console.error("createUser error name:", err.name);
@@ -80,6 +81,9 @@ const createUser = (req, res) => {
       }
       if (err.name === 11000) {
         return res.status(1100).send({ messsage: "MongoDB duplicate error" });
+      }
+      if (err.name === "ReferenceError") {
+        return res.status(409).send({ message: "Reference Error" });
       }
       return res
         .status(defaultError500)
@@ -116,4 +120,10 @@ const login = (req, res) => {
     });
 };
 
-module.exports = { getUsers, getUser, createUser, login };
+const getCurrentUser = (req, res) => {
+  // The controller should return the logged-in user data based
+  // on the _id value.
+  const currentUser = req._id;
+};
+
+module.exports = { getUsers, getUser, createUser, login, getCurrentUser };

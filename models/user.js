@@ -16,13 +16,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "The password field is required."],
     minlength: 2,
-    maxlength: 10,
+    maxlength: 100,
   },
   name: {
     type: String,
     required: true,
     minlength: 2,
-    maxlength: 30,
+    maxlength: 100,
   },
   avatar: {
     type: String,
