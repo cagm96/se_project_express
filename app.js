@@ -17,14 +17,6 @@ mongoose.set("strictQuery", true);
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "665527ae985ce6432f836d6e",
-  };
-
-  next();
-});
-
 app.use("/", mainRouter);
 
 app.listen(PORT, () => {

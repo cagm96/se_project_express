@@ -63,6 +63,7 @@ const createUser = (req, res) => {
   );
 
   User.findOne({ email })
+    .select("+password")
     .then((user) => {
       if (!user) {
         bcrypt
@@ -124,6 +125,20 @@ const getCurrentUser = (req, res) => {
   // The controller should return the logged-in user data based
   // on the _id value.
   const currentUser = req._id;
+  console.log(currentUser);
+};
+
+const modifyUserData = (req, res) => {
+  //This route should only allow modification of the name and
+  //avatar fields.
+  //You'll need to return an updated object in the response
+  //(using the new property). Don't forget to handle Not Found,
+  //Validation, and default server errors for these routes.
+  //Recall that you’ve already set up your user model to validate
+  //that the data used meets certain criteria. However, by default,
+  //this validation won’t be run when updating a resource.
+  //You can refer to the documentation for information on how
+  //to enable validators.
 };
 
 module.exports = { getUsers, getUser, createUser, login, getCurrentUser };
