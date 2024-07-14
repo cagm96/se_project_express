@@ -65,15 +65,21 @@ const createUser = (req, res) => {
   User.findOne({ email })
     .select("+password")
     .then((user) => {
+      if (user) {
+        return res
+          .status(400)
+          .send({ message: "User with this email already exists" });
+      }
       if (!user) {
         bcrypt
           .hash(password, 10)
-          .then((hash) => User.create({ name, avatar, email, password: hash }))
+          .then((hash) => {
+            return User.create({ name, avatar, email, password: hash });
+          })
           .then((user) => {
             res.send({ data: user });
           });
       }
-      next();
     })
     .catch((err) => {
       console.error("createUser error name:", err.name);
@@ -84,7 +90,7 @@ const createUser = (req, res) => {
         return res.status(1100).send({ messsage: "MongoDB duplicate error" });
       }
       if (err.name === "ReferenceError") {
-        return res.status(409).send({ message: "Reference Error" });
+        return res.status(400).send({ message: "Reference Error" });
       }
       return res
         .status(defaultError500)

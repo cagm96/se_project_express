@@ -15,16 +15,13 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "The password field is required."],
-    minlength: 2,
-    maxlength: 100,
+
     select: false, //This way, the user's password hash won't be
     // returned from the database by default.
   },
   name: {
     type: String,
     required: true,
-    minlength: 2,
-    maxlength: 100,
   },
   avatar: {
     type: String,
