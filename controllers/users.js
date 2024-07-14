@@ -102,6 +102,12 @@ const login = (req, res) => {
   //  controller that gets the email and password from the request
   //  and authenticates them.
   const { email, password } = req.body;
+  console.log(
+    "Login request received with email:",
+    email,
+    "and password:",
+    password
+  );
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -123,7 +129,9 @@ const login = (req, res) => {
       // If the email and password are incorrect,
       // the controller should return a 401 error.
 
-      res.status(401).send({ message: err.message });
+      res
+        .status(401)
+        .send({ message: err.message + " error from login controller" });
     });
 };
 
