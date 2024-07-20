@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const { JWT_SECRET } = require("../utils/config");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -48,11 +49,27 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
       }
 
       // found - comparing hashes
-      return bcrypt.compare(password, user.password).then((matched) => {
-        if (!matched) {
-          return Promise.reject(new Error("Incorrect email or password"));
+      return bcrypt.compare(password, user.password, (err, isMatch) => {
+        if (err) {
+          console.error("bcrypt compare error:", err);
+          return res.status(500).send({ message: "Internal server error" });
         }
-        return user;
+        if (!isMatch) {
+          return res.status(401).send({ message: "Invalid email or password" });
+        }
+        if (!user._id || !JWT_SECRET) {
+          console.error("user._id or JWT_SECRET is undefined");
+          return res.status(500).send({ message: "Internal server error" });
+        }
+        console.log("User ID:", user._id);
+        console.log("JWT_SECRET:", JWT_SECRET);
+        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+          //JWT_SECRET contains a value of your secret key for the signature
+          expiresIn: "7d",
+        });
+        //Once the JWT has been created, it should be sent to
+        //the client in the response body
+        res.send({ token });
       });
     });
 };

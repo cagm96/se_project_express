@@ -101,8 +101,9 @@ const login = (req, res) => {
     password
   );
 
-  return User.findUserByCredentials(email)
+  User.findUserByCredentials(email, password)
     .then((user) => {
+      console.log({ user });
       // authentication successful! user is in the user variable
       // If the email and password are correct, the controller should create a
       // JSON web token (JWT) that expires after a week.
@@ -116,29 +117,6 @@ const login = (req, res) => {
         console.error("user._id or JWT_SECRET is undefined");
         return res.status(500).send({ message: "Internal server error" });
       }
-
-      bcrypt.compare(password, user.password, (err, isMatch) => {
-        if (err) {
-          console.error("bcrypt compare error:", err);
-          return res.status(500).send({ message: "Internal server error" });
-        }
-        if (!isMatch) {
-          return res.status(401).send({ message: "Invalid email or password" });
-        }
-        if (!user._id || !JWT_SECRET) {
-          console.error("user._id or JWT_SECRET is undefined");
-          return res.status(500).send({ message: "Internal server error" });
-        }
-        console.log("User ID:", user._id);
-        console.log("JWT_SECRET:", JWT_SECRET);
-        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-          //JWT_SECRET contains a value of your secret key for the signature
-          expiresIn: "7d",
-        });
-        //Once the JWT has been created, it should be sent to
-        //the client in the response body
-        res.send({ token });
-      });
     })
 
     .catch((err) => {
