@@ -5,7 +5,7 @@ const {
   itemNotFound404,
   defaultError500,
 } = require("../utils/errors");
-const { JWT_SECRET } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
@@ -42,14 +42,8 @@ const getUser = (req, res) => {
         .send({ message: "An error has occurred on the server." });
     });
 };
-const createUser = (req, res) => {
-  //1.  Check that there's not already an existing user with an email matching the one contained
-  // in the request body.
-  //2.  Since the email field is set as required in the user schema,
-  // the User.create() function will throw a 11000 error (a MongoDB duplicate error).
-  // Handle this error code in a throw block and return a corresponding error message.
-  //3.  Make sure that passwords are hashed before being saved to the database.
 
+const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   console.log(
     "Creating user with name:",
@@ -63,37 +57,35 @@ const createUser = (req, res) => {
   );
 
   User.findOne({ email })
-    .select("+password")
     .then((user) => {
       if (user) {
         return res
           .status(400)
           .send({ message: "User with this email already exists" });
       }
-      if (!user) {
-        bcrypt
-          .hash(password, 10)
-          .then((hash) => {
-            return User.create({ name, avatar, email, password: hash });
-          })
-          .then((user) => {
-            res.send({ data: user });
-          });
-      }
+
+      // Hash the password
+      return bcrypt
+        .hash(password, 10)
+        .then((hash) => {
+          return User.create({ name, avatar, email, password: hash });
+        })
+        .then((newUser) => {
+          res.status(201).send({ data: newUser });
+        });
     })
     .catch((err) => {
       console.error("createUser error name:", err.name);
       if (err.name === "ValidationError") {
-        return res.status(invalidData400).send({ message: "Invalid data" });
+        return res.status(400).send({ message: "Invalid data" });
       }
-      if (err.name === 11000) {
-        return res.status(1100).send({ messsage: "MongoDB duplicate error" });
-      }
-      if (err.name === "ReferenceError") {
-        return res.status(400).send({ message: "Reference Error" });
+      if (err.code === 11000) {
+        return res
+          .status(409)
+          .send({ message: "User with this email already exists" });
       }
       return res
-        .status(defaultError500)
+        .status(500)
         .send({ message: "An error has occurred on the server." });
     });
 };
@@ -109,21 +101,46 @@ const login = (req, res) => {
     password
   );
 
-  return User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email)
     .then((user) => {
       // authentication successful! user is in the user variable
       // If the email and password are correct, the controller should create a
       // JSON web token (JWT) that expires after a week.
       // Only the _id property containing the user's identifier should be written
       // to the token payload:
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        //JWT_SECRET contains a value of your secret key for the signature
-        expiresIn: "7d",
+      if (!user) {
+        return res.status(401).send({ message: "Invalid email or password" });
+      }
+      // Check user._id and JWT_SECRET
+      if (!user._id || !JWT_SECRET) {
+        console.error("user._id or JWT_SECRET is undefined");
+        return res.status(500).send({ message: "Internal server error" });
+      }
+
+      bcrypt.compare(password, user.password, (err, isMatch) => {
+        if (err) {
+          console.error("bcrypt compare error:", err);
+          return res.status(500).send({ message: "Internal server error" });
+        }
+        if (!isMatch) {
+          return res.status(401).send({ message: "Invalid email or password" });
+        }
+        if (!user._id || !JWT_SECRET) {
+          console.error("user._id or JWT_SECRET is undefined");
+          return res.status(500).send({ message: "Internal server error" });
+        }
+        console.log("User ID:", user._id);
+        console.log("JWT_SECRET:", JWT_SECRET);
+        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+          //JWT_SECRET contains a value of your secret key for the signature
+          expiresIn: "7d",
+        });
+        //Once the JWT has been created, it should be sent to
+        //the client in the response body
+        res.send({ token });
       });
-      //Once the JWT has been created, it should be sent to
-      //the client in the response body
-      res.send({ token });
     })
+
     .catch((err) => {
       // authentication error
       // If the email and password are incorrect,
@@ -138,8 +155,8 @@ const login = (req, res) => {
 const getCurrentUser = (req, res) => {
   // The controller should return the logged-in user data based
   // on the _id value.
-  const currentUser = req._id;
   console.log(currentUser);
+  return (currentUser = req._id);
 };
 
 const modifyUserData = (req, res) => {
