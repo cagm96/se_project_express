@@ -119,6 +119,20 @@ const login = (req, res) => {
       }
     })
 
+    // found - comparing hashes
+    // return bcrypt.compare(password, user.password, (err, isMatch) => {
+    //   if (err) {
+    //     console.error("bcrypt compare error:", err);
+    //     return res.status(500).send({ message: "Internal server error" });
+    //   }
+    //   if (!isMatch) {
+    //     return res.status(401).send({ message: "Invalid email or password" });
+    //   }
+    //   if (!user._id || !JWT_SECRET) {
+    //     console.error("user._id or JWT_SECRET is undefined");
+    //     return res.status(500).send({ message: "Internal server error" });
+    //   }
+
     .catch((err) => {
       // authentication error
       // If the email and password are incorrect,
