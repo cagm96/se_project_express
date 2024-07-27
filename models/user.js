@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "The password field is required."],
 
-    select: false, //This way, the user's password hash won't be
+    //This way, the user's password hash won't be
     // returned from the database by default.
   },
   name: {
@@ -36,21 +36,19 @@ const userSchema = new mongoose.Schema({
     },
   },
 });
-userSchema.statics.findUserByCredentials = function findUserByCredentials(
-  email,
-  password
-) {
-  // trying to find the user by email
-  this.findOne({ email }) // this — the User model
-    .then((user) => {
-      // not found - rejecting the promise
-      if (!user) {
-        return Promise.reject(new Error("Incorrect email or password"));
-      }
-      bcrypt.compare(password, user.password, (err, isMatch) => {
-        return user;
-      });
-    });
+
+userSchema.statics.findUserByCredentials = function (email, password) {
+  const user = this.findOne({ email }).then((user) => {
+    console.log({ "From userSchema": user });
+  });
+
+  return bcrypt.compare(password, user.password).then((err, isMatch) => {
+    if (!isMatch) {
+      return "incorrect password";
+    }
+
+    return user;
+  });
 };
 
 module.exports = mongoose.model("user", userSchema);

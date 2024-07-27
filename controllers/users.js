@@ -6,6 +6,8 @@ const {
   defaultError500,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const jwt = require("jsonwebtoken");
+
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
@@ -90,58 +92,43 @@ const createUser = (req, res) => {
     });
 };
 
-const login = (req, res) => {
-  //  controller that gets the email and password from the request
-  //  and authenticates them.
+const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log(
-    "Login request received with email:",
-    email,
-    "and password:",
-    password
-  );
 
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      console.log({ user });
-      // authentication successful! user is in the user variable
-      // If the email and password are correct, the controller should create a
-      // JSON web token (JWT) that expires after a week.
-      // Only the _id property containing the user's identifier should be written
-      // to the token payload:
-      if (!user) {
-        return res.status(401).send({ message: "Invalid email or password" });
-      }
-      // Check user._id and JWT_SECRET
-      if (!user._id || !JWT_SECRET) {
-        console.error("user._id or JWT_SECRET is undefined");
-        return res.status(500).send({ message: "Internal server error" });
-      }
-    })
+  try {
+    // Find the user by credentials
+    const user = User.findUserByCredentials(email, password).then((user) =>
+      console.log("from login controller", user)
+    );
+    if (!user) {
+      return res.status(401).send({ message: "Invalid email or password" });
+    }
 
-    // found - comparing hashes
-    // return bcrypt.compare(password, user.password, (err, isMatch) => {
-    //   if (err) {
-    //     console.error("bcrypt compare error:", err);
-    //     return res.status(500).send({ message: "Internal server error" });
-    //   }
-    //   if (!isMatch) {
-    //     return res.status(401).send({ message: "Invalid email or password" });
-    //   }
-    //   if (!user._id || !JWT_SECRET) {
-    //     console.error("user._id or JWT_SECRET is undefined");
-    //     return res.status(500).send({ message: "Internal server error" });
-    //   }
+    // Compare the password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).send({ message: "Invalid email or password" });
+    }
 
-    .catch((err) => {
-      // authentication error
-      // If the email and password are incorrect,
-      // the controller should return a 401 error.
+    // Check if user ID or JWT_SECRET is undefined
+    if (!user._id || !JWT_SECRET) {
+      console.error("user._id or JWT_SECRET is undefined");
+      return res
+        .status(500)
+        .send({ message: "Internal server error from the try statement" });
+    }
 
-      res
-        .status(401)
-        .send({ message: err.message + " error from login controller" });
+    // Generate JWT
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+
+    // Send token to client
+    res.status(200).send({ token });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).send({
+      message: "Internal server error from the catch in the login controller",
     });
+  }
 };
 
 const getCurrentUser = (req, res) => {
