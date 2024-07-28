@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const user = require("../models/user");
 const bcrypt = require("bcryptjs");
 const {
   invalidData400,
@@ -58,7 +58,8 @@ const createUser = (req, res) => {
     email
   );
 
-  User.findOne({ email })
+  user
+    .findOne({ email })
     .then((user) => {
       if (user) {
         return res
@@ -96,7 +97,8 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   // Find the user by credentials
-  User.findUserByCredentials(email, password)
+  user
+    .findUserByCredentials(email, password)
     .then((user) => {
       console.log("user object from the login controller", user);
       if (!user) {
@@ -124,9 +126,10 @@ const login = (req, res) => {
       res.status(200).send({ token });
     })
     .catch((err) => {
-      console.error("Login error:", err);
+      console.error("Login error:", err.name);
       res.status(500).send({
-        message: "Internal server error from the catch in the login controller",
+        message:
+          "Internal server error from the catch in the login controller" + err,
       });
     });
 
