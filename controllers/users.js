@@ -92,43 +92,45 @@ const createUser = (req, res) => {
     });
 };
 
-const login = async (req, res) => {
+const login = (req, res) => {
   const { email, password } = req.body;
 
-  try {
-    // Find the user by credentials
-    const user = User.findUserByCredentials(email, password).then((user) =>
-      console.log("from login controller", user)
-    );
-    if (!user) {
-      return res.status(401).send({ message: "Invalid email or password" });
-    }
+  // Find the user by credentials
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      console.log("user object from the login controller", user);
+      if (!user) {
+        return res.status(401).send({ message: "Invalid email or password" });
+      }
+      const isMatch = bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).send({ message: "Invalid email or password" });
+      }
 
-    // Compare the password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).send({ message: "Invalid email or password" });
-    }
+      // Check if user ID or JWT_SECRET is undefined
+      if (!user._id || !JWT_SECRET) {
+        console.error("user._id or JWT_SECRET is undefined");
+        return res
+          .status(500)
+          .send({ message: "Internal server error from the try statement" });
+      }
 
-    // Check if user ID or JWT_SECRET is undefined
-    if (!user._id || !JWT_SECRET) {
-      console.error("user._id or JWT_SECRET is undefined");
-      return res
-        .status(500)
-        .send({ message: "Internal server error from the try statement" });
-    }
+      // Generate JWT
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
 
-    // Generate JWT
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-
-    // Send token to client
-    res.status(200).send({ token });
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).send({
-      message: "Internal server error from the catch in the login controller",
+      // Send token to client
+      res.status(200).send({ token });
+    })
+    .catch((err) => {
+      console.error("Login error:", err);
+      res.status(500).send({
+        message: "Internal server error from the catch in the login controller",
+      });
     });
-  }
+
+  // Compare the password
 };
 
 const getCurrentUser = (req, res) => {
