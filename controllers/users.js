@@ -104,10 +104,6 @@ const login = (req, res) => {
       if (!user) {
         return res.status(401).send({ message: "Invalid email or password" });
       }
-      const isMatch = bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).send({ message: "Invalid email or password" });
-      }
 
       // Check if user ID or JWT_SECRET is undefined
       if (!user._id || !JWT_SECRET) {
