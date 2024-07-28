@@ -1,4 +1,4 @@
-const user = require("../models/user");
+const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const {
   invalidData400,
@@ -58,8 +58,7 @@ const createUser = (req, res) => {
     email
   );
 
-  user
-    .findOne({ email })
+  User.findOne({ email })
     .then((user) => {
       if (user) {
         return res
@@ -97,8 +96,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   // Find the user by credentials
-  user
-    .findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       console.log("user object from the login controller", user);
       if (!user) {
