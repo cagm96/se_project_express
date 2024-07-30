@@ -9,7 +9,7 @@ router.use("/users", auth, userRouter);
 router.use("/items", auth, clothingItem);
 router.post("/signin", login);
 router.post("/signup", createUser);
-router.get("/users/me", getCurrentUser);
+router.get("/users/me", auth, getCurrentUser);
 
 router.use((req, res) => {
   res.status(invalidData404).send({ message: "Router not found " });

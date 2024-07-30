@@ -45,7 +45,7 @@ const getUser = (req, res) => {
     });
 };
 
-const createUser = (req, res) => {
+const createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   console.log(
     "Creating user with name:",
@@ -58,38 +58,41 @@ const createUser = (req, res) => {
     email
   );
 
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        return res
-          .status(400)
-          .send({ message: "User with this email already exists" });
-      }
+  try {
+    const existingUser = await User.findOne({ email });
 
-      // Hash the password
-      return bcrypt
-        .hash(password, 10)
-        .then((hash) => {
-          return User.create({ name, avatar, email, password: hash });
-        })
-        .then((newUser) => {
-          res.status(201).send({ data: newUser });
-        });
-    })
-    .catch((err) => {
-      console.error("createUser error name:", err.name);
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Invalid data" });
-      }
-      if (err.code === 11000) {
-        return res
-          .status(409)
-          .send({ message: "User with this email already exists" });
-      }
+    if (existingUser) {
       return res
-        .status(500)
-        .send({ message: "An error has occurred on the server." });
+        .status(400)
+        .send({ message: "User with this email already exists" });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the new user with the hashed password
+    const newUser = await User.create({
+      name: name,
+      avatar: avatar,
+      email: email,
+      password: hashedPassword,
     });
+
+    res.status(201).send({ data: newUser });
+  } catch (err) {
+    console.error("createUser error name:", err.name);
+    if (err.name === "ValidationError") {
+      return res.status(400).send({ message: "Invalid data" });
+    }
+    if (err.code === 11000) {
+      return res
+        .status(409)
+        .send({ message: "User with this email already exists" });
+    }
+    return res
+      .status(500)
+      .send({ message: "An error has occurred on the server." });
+  }
 };
 
 const login = (req, res) => {
