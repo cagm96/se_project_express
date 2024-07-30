@@ -100,6 +100,7 @@ const login = (req, res) => {
 
   // Find the user by credentials
   User.findUserByCredentials(email, password)
+    .select("+password")
     .then((user) => {
       console.log("user object from the login controller", user);
       if (!user) {
