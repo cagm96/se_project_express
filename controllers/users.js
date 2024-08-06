@@ -45,6 +45,49 @@ const getUser = (req, res) => {
     });
 };
 
+// const createUser = (req, res) => {
+//   const { name, avatar, email, password } = req.body;
+//   console.log(
+//     "Creating user with name:",
+//     name,
+//     ", avatar:",
+//     avatar,
+//     ", password:",
+//     password,
+//     ", email:",
+//     email
+//   );
+
+//   const existingUser = await  User.findOne({ email });
+
+//         if (existingUser) {
+//           return res
+//             .status(400)
+//             .send({ message: "User with this email already exists" });
+//         }
+
+//         // Hash the password
+//        const hashedPassword = await bcrypt.hash(password, 10);
+//        const NewUser = User.create({ name, avatar, email, password: hash });
+
+//             res.status(201).send({ data: newUser });
+
+//       .catch((err) => {
+//         console.error("createUser error name:", err.name);
+//         if (err.name === "ValidationError") {
+//           return res.status(400).send({ message: "Invalid data" });
+//         }
+//         if (err.code === 11000) {
+//           return res
+//             .status(409)
+//             .send({ message: "User with this email already exists" });
+//         }
+//         return res
+//           .status(500)
+//           .send({ message: "An error has occurred on the server." });
+//       });
+// };
+
 const createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   console.log(
@@ -100,7 +143,6 @@ const login = (req, res) => {
 
   // Find the user by credentials
   User.findUserByCredentials(email, password)
-    .select("+password")
     .then((user) => {
       console.log("user object from the login controller", user);
       if (!user) {
