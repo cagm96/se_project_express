@@ -121,7 +121,9 @@ const createUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    res.status(201).send({ data: newUser });
+    const { password: pwd, ...userWithoutPassword } = newUser.toObject();
+
+    res.status(201).send({ data: userWithoutPassword });
   } catch (err) {
     console.error("createUser error name:", err.name);
     if (err.name === "ValidationError") {
