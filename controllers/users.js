@@ -191,7 +191,7 @@ const getCurrentUser = (req, res) => {
   // on the _id value.
   const currentUser = req.user._id;
   console.log("Current user from getCurrentUser controller", currentUser);
-  return { currentUser };
+  return res.json({ userId: currentUser });
 };
 
 const modifyUserData = (req, res) => {
