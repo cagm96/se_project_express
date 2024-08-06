@@ -189,8 +189,9 @@ const login = (req, res) => {
 const getCurrentUser = (req, res) => {
   // The controller should return the logged-in user data based
   // on the _id value.
-  console.log(currentUser);
-  return (currentUser = req._id);
+  const currentUser = req.user._id;
+  console.log("Current user from getCurrentUser controller", currentUser);
+  return { currentUser };
 };
 
 const modifyUserData = (req, res) => {
