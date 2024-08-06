@@ -106,7 +106,7 @@ const createUser = async (req, res) => {
 
     if (existingUser) {
       return res
-        .status(400)
+        .status(409)
         .send({ message: "User with this email already exists" });
     }
 
@@ -128,9 +128,10 @@ const createUser = async (req, res) => {
       return res.status(400).send({ message: "Invalid data" });
     }
     if (err.code === 11000) {
-      return res
-        .status(409)
-        .send({ message: "User with this email already exists" });
+      return res.status(409).send({
+        message:
+          "User with this email already exists from createUser controller",
+      });
     }
     return res
       .status(500)
@@ -167,6 +168,13 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error("Login error:", err.name);
+      if (err.name === "Error") {
+        return res.status(400).send({
+          message:
+            " Authorization with non-existent email and password in the database",
+        });
+      }
+
       res.status(500).send({
         message:
           "Internal server error from the catch in the login controller" + err,
