@@ -189,9 +189,23 @@ const login = (req, res) => {
 const getCurrentUser = (req, res) => {
   // The controller should return the logged-in user data based
   // on the _id value.
-  const currentUser = req.user._id;
-  console.log("Current user from getCurrentUser controller", currentUser);
-  return res.json({ userId: currentUser });
+  //
+  // console.log("Current user from getCurrentUser controller", user);
+  // return res.json({ userId: currentUser });
+
+  try {
+    const user = User.findOne(req.user);
+
+    if (!user) {
+      throw new Error();
+    }
+
+    return res.status(200).send(user);
+  } catch (error) {
+    res
+      .status(401)
+      .send({ error: "Could not find user from getCurrentUser controller " });
+  }
 };
 
 const modifyUserData = (req, res) => {
