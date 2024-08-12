@@ -40,28 +40,28 @@ const getItems = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-
   console.log("clothing item id: ", itemId);
-  ClothingItem.findByIdAndDelete(itemId)
-    .orFail(() => {
-      const error = new Error("Item ID not found");
-      error.statusCode = 404;
-      throw error;
-    })
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((err) => {
-      console.error("deleteItem error name: ", err.name);
-      const statusCode = err.statusCode || 500;
+  try {
+    ClothingItem.findByIdAndDelete(itemId)
+      .orFail(() => {
+        const error = new Error("Item ID not found");
+        error.statusCode = 404;
+        throw error;
+      })
+      .then((item) => res.status(403).send({ data: item }));
+  } catch (err) {
+    console.error("deleteItem error name: ", err.name);
+    const statusCode = err.statusCode || 500;
 
-      if (err.name === "CastError") {
-        return res
-          .status(invalidData400)
-          .send({ message: "Error from deleteItem" });
-      }
+    if (err.name === "CastError") {
       return res
-        .status(statusCode)
-        .send({ message: "An error has occurred on the server." });
-    });
+        .status(invalidData400)
+        .send({ message: "Error from deleteItem" });
+    }
+    return res
+      .status(statusCode)
+      .send({ message: "An error has occurred on the server." });
+  }
 };
 
 const likeItem = (req, res) => {

@@ -194,13 +194,14 @@ const getCurrentUser = (req, res) => {
   // return res.json({ userId: currentUser });
 
   try {
-    const user = User.findOne(req.user);
-
-    if (!user) {
-      throw new Error();
-    }
-
-    return res.status(200).send(user);
+    User.findOne(req.user).then((user) => {
+      if (!user) {
+        throw new Error();
+      }
+      console.log(user);
+      return res.status(200).send(user);
+      next();
+    });
   } catch (error) {
     res
       .status(401)
@@ -209,6 +210,9 @@ const getCurrentUser = (req, res) => {
 };
 
 const modifyUserData = (req, res) => {
+  console.log("from modifyUserData", req);
+
+  console.log("from modifyUserData", res);
   //This route should only allow modification of the name and
   //avatar fields.
   //You'll need to return an updated object in the response
@@ -221,4 +225,11 @@ const modifyUserData = (req, res) => {
   //to enable validators.
 };
 
-module.exports = { getUsers, getUser, createUser, login, getCurrentUser };
+module.exports = {
+  getUsers,
+  getUser,
+  createUser,
+  login,
+  getCurrentUser,
+  modifyUserData,
+};
