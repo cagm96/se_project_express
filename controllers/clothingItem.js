@@ -38,17 +38,29 @@ const getItems = (req, res) => {
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = async (req, res) => {
+  // The user shouldn't be able to delete items added by other users.
+  //  In the controller for deleting clothing items, check whether the item owner's
+  //  _id equals the _id of the logged-in user. If the _id of the current user and
+  //   the item's owner is the same, the item can be deleted. Otherwise, return an
+  //   error with the 403 status code.
   const { itemId } = req.params;
   console.log("clothing item id: ", itemId);
   try {
-    ClothingItem.findByIdAndDelete(itemId)
-      .orFail(() => {
-        const error = new Error("Item ID not found");
-        error.statusCode = 404;
-        throw error;
-      })
-      .then((item) => res.status(403).send({ data: item }));
+    const item = await ClothingItem.findById(itemId).orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = 404;
+      throw error;
+    });
+
+    if (item.owner.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .send({ message: "You do not have permission to delete this item" });
+    }
+
+    await ClothingItem.findByIdAndDelete(itemId);
+    return res.status(200).send({ message: "Item successfully deleted" });
   } catch (err) {
     console.error("deleteItem error name: ", err.name);
     const statusCode = err.statusCode || 500;

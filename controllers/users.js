@@ -200,7 +200,6 @@ const getCurrentUser = (req, res) => {
       }
       console.log(user);
       return res.status(200).send(user);
-      next();
     });
   } catch (error) {
     res
@@ -210,9 +209,6 @@ const getCurrentUser = (req, res) => {
 };
 
 const modifyUserData = (req, res) => {
-  console.log("from modifyUserData", req);
-
-  console.log("from modifyUserData", res);
   //This route should only allow modification of the name and
   //avatar fields.
   //You'll need to return an updated object in the response
@@ -223,6 +219,29 @@ const modifyUserData = (req, res) => {
   //this validation won’t be run when updating a resource.
   //You can refer to the documentation for information on how
   //to enable validators.
+  try {
+    const updates = { name: req.body.name, avatar: req.body.avatar };
+
+    User.findByIdAndUpdate(req.user._id, updates, {
+      new: true,
+      runValidators: true,
+    })
+      .orFail(() => {
+        const error = new Error(
+          "User ID not found this is comming from modifyUserData"
+        );
+        error.statusCode = 404;
+        throw error;
+      })
+      .then((updatedUser) => {
+        console.log("updated User from modifyUserData", updatedUser);
+        return res.status(200).send(updatedUser);
+      });
+  } catch (error) {
+    res
+      .status(401)
+      .send({ error: "Could not update user from modifyUserData" });
+  }
 };
 
 module.exports = {

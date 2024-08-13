@@ -15,7 +15,7 @@ router.use("/items", auth, clothingItem);
 router.post("/signin", login);
 router.post("/signup", createUser);
 router.get("/users/me", auth, getCurrentUser);
-router.patch("/users/me", auth, getCurrentUser, modifyUserData);
+router.patch("/users/me", auth, modifyUserData);
 router.use((req, res) => {
   res.status(invalidData404).send({ message: "Router not found " });
 });
