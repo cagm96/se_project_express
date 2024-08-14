@@ -2,91 +2,13 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const {
   invalidData400,
+  unauthorizedReq401,
   itemNotFound404,
   defaultError500,
+  requestConflict409,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 const jwt = require("jsonwebtoken");
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => {
-      res.send(users);
-    })
-    .catch((err) => {
-      console.error("getUsers error name", err.name);
-      return res
-        .status(defaultError500)
-        .send({ message: "An error has occurred on the server." });
-    });
-};
-const getUser = (req, res) => {
-  console.log("user id: ", req.params.userID);
-  User.findById(req.params.userID)
-    .orFail(() => {
-      const error = new Error("User ID not found this is comming from .orFail");
-      error.statusCode = 404;
-      throw error;
-    })
-    .then((user) => {
-      res.send({ data: user });
-    })
-    .catch((err) => {
-      console.error("getUser error name is: ", err.name);
-      if (err.name === "CastError") {
-        return res.status(invalidData400).send({ message: "Invalid ID" });
-      }
-      if (err.name === "Error") {
-        return res.status(itemNotFound404).send({ message: err.message });
-      }
-      return res
-        .status(defaultError500)
-        .send({ message: "An error has occurred on the server." });
-    });
-};
-
-// const createUser = (req, res) => {
-//   const { name, avatar, email, password } = req.body;
-//   console.log(
-//     "Creating user with name:",
-//     name,
-//     ", avatar:",
-//     avatar,
-//     ", password:",
-//     password,
-//     ", email:",
-//     email
-//   );
-
-//   const existingUser = await  User.findOne({ email });
-
-//         if (existingUser) {
-//           return res
-//             .status(400)
-//             .send({ message: "User with this email already exists" });
-//         }
-
-//         // Hash the password
-//        const hashedPassword = await bcrypt.hash(password, 10);
-//        const NewUser = User.create({ name, avatar, email, password: hash });
-
-//             res.status(201).send({ data: newUser });
-
-//       .catch((err) => {
-//         console.error("createUser error name:", err.name);
-//         if (err.name === "ValidationError") {
-//           return res.status(400).send({ message: "Invalid data" });
-//         }
-//         if (err.code === 11000) {
-//           return res
-//             .status(409)
-//             .send({ message: "User with this email already exists" });
-//         }
-//         return res
-//           .status(500)
-//           .send({ message: "An error has occurred on the server." });
-//       });
-// };
 
 const createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -106,7 +28,7 @@ const createUser = async (req, res) => {
 
     if (existingUser) {
       return res
-        .status(409)
+        .status(requestConflict409)
         .send({ message: "User with this email already exists" });
     }
 
@@ -127,16 +49,16 @@ const createUser = async (req, res) => {
   } catch (err) {
     console.error("createUser error name:", err.name);
     if (err.name === "ValidationError") {
-      return res.status(400).send({ message: "Invalid data" });
+      return res.status(invalidData400).send({ message: "Invalid data" });
     }
     if (err.code === 11000) {
-      return res.status(409).send({
+      return res.status(requestConflict409).send({
         message:
           "User with this email already exists from createUser controller",
       });
     }
     return res
-      .status(500)
+      .status(defaultError500)
       .send({ message: "An error has occurred on the server." });
   }
 };
@@ -148,17 +70,6 @@ const login = (req, res) => {
   User.findUserByCredentials(email, password)
     .then((user) => {
       console.log("user object from the login controller", user);
-      if (!user) {
-        return res.status(401).send({ message: "Invalid email or password" });
-      }
-
-      // Check if user ID or JWT_SECRET is undefined
-      if (!user._id || !JWT_SECRET) {
-        console.error("user._id or JWT_SECRET is undefined");
-        return res
-          .status(500)
-          .send({ message: "Internal server error from the try statement" });
-      }
 
       // Generate JWT
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -171,15 +82,19 @@ const login = (req, res) => {
     .catch((err) => {
       console.error("Login error:", err.name);
       if (err.name === "Error") {
-        return res.status(400).send({
+        return res.status(invalidData400).send({
           message:
             " Authorization with non-existent email and password in the database",
         });
       }
 
-      res.status(500).send({
-        message:
-          "Internal server error from the catch in the login controller" + err,
+      if (err.message === "Incorrect password or email") {
+        return res
+          .status(unauthorizedReq401)
+          .send({ message: "unauthorized request" });
+      }
+      return res.status(defaultError500).send({
+        message: "Internal server error from the catch in the login controller",
       });
     });
 
@@ -194,16 +109,23 @@ const getCurrentUser = (req, res) => {
   // return res.json({ userId: currentUser });
 
   try {
-    User.findOne(req.user).then((user) => {
+    User.findOne({ _id: req.user._id }).then((user) => {
       if (!user) {
-        throw new Error();
+        return res
+          .status(itemNotFound404)
+          .send({ message: "Item ID not found" });
       }
       console.log(user);
       return res.status(200).send(user);
     });
   } catch (error) {
-    res
-      .status(401)
+    if (err.message === "Incorrect password or email") {
+      return res
+        .status(unauthorizedReq401)
+        .send({ message: "unauthorized request" });
+    }
+    return res
+      .status(defaultError500)
       .send({ error: "Could not find user from getCurrentUser controller " });
   }
 };
@@ -238,15 +160,19 @@ const modifyUserData = (req, res) => {
         return res.status(200).send(updatedUser);
       });
   } catch (error) {
-    res
-      .status(401)
+    if (err.name === "ValidationError") {
+      return res.status(invalidData400).send({
+        message:
+          " Authorization with non-existent email and password in the database",
+      });
+    }
+    return res
+      .status(500)
       .send({ error: "Could not update user from modifyUserData" });
   }
 };
 
 module.exports = {
-  getUsers,
-  getUser,
   createUser,
   login,
   getCurrentUser,

@@ -1,6 +1,10 @@
 const ClothingItem = require("../models/clothingItem");
 
-const { invalidData400, defaultError500 } = require("../utils/errors");
+const {
+  invalidData400,
+  defaultError500,
+  authRefused403,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -55,7 +59,7 @@ const deleteItem = async (req, res) => {
 
     if (item.owner.toString() !== req.user._id.toString()) {
       return res
-        .status(403)
+        .status(authRefused403)
         .send({ message: "You do not have permission to delete this item" });
     }
 
