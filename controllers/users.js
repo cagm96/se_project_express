@@ -46,7 +46,7 @@ const createUser = async (req, res) => {
 
     const { password: pwd, ...userWithoutPassword } = newUser.toObject();
 
-    res.status(201).send({ data: userWithoutPassword });
+    return res.status(201).send({ data: userWithoutPassword });
   } catch (err) {
     console.error("createUser error name:", err.name);
     if (err.name === "ValidationError") {
@@ -102,23 +102,14 @@ const login = (req, res) => {
   // Compare the password
 };
 
-const getCurrentUser = (req, res) => {
-  // The controller should return the logged-in user data based
-  // on the _id value.
-  //
-  // console.log("Current user from getCurrentUser controller", user);
-  // return res.json({ userId: currentUser });
-
+const getCurrentUser = async (req, res) => {
   try {
-    User.findOne({ _id: req.user._id }).then((user) => {
-      if (!user) {
-        return res
-          .status(itemNotFound404)
-          .send({ message: "Item ID not found" });
-      }
-      console.log(user);
-      return res.status(200).send(user);
-    });
+    const user = await User.findOne({ _id: req.user._id });
+    if (!user) {
+      return res.status(itemNotFound404).send({ message: "Item ID not found" });
+    }
+    console.log(user);
+    return res.status(200).send(user);
   } catch (error) {
     if (error.message === "Incorrect password or email") {
       return res
@@ -131,27 +122,25 @@ const getCurrentUser = (req, res) => {
   }
 };
 
-const modifyUserData = (req, res) => {
+const modifyUserData = async (req, res) => {
   try {
     const updates = { name: req.body.name, avatar: req.body.avatar };
 
-    User.findByIdAndUpdate(req.user._id, updates, {
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
       runValidators: true,
-    })
-      .orFail(() => {
-        const error = new Error(
-          "User ID not found this is comming from modifyUserData"
-        );
-        error.statusCode = 404;
-        throw error;
-      })
-      .then((updatedUser) => {
-        console.log("updated User from modifyUserData", updatedUser);
-        return res.status(200).send(updatedUser);
-      });
+    }).orFail(() => {
+      const error = new Error(
+        "User ID not found this is comming from modifyUserData"
+      );
+      error.statusCode = 404;
+      throw error;
+    });
+
+    console.log("updated User from modifyUserData", updatedUser);
+    return res.status(200).send(updatedUser);
   } catch (error) {
-    if (err.name === "ValidationError") {
+    if (error.name === "ValidationError") {
       return res.status(invalidData400).send({
         message:
           " Authorization with non-existent email and password in the database",

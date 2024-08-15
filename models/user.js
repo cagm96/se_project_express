@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "The password field is required."],
     select: false,
-    //This way, the user's password hash won't be
+    // This way, the user's password hash won't be
 
     // returned from the database by default.
   },
@@ -48,7 +48,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
       }
       return bcrypt.compare(password, user.password).then((isMatch) => {
         if (!isMatch) {
-          return Promise.reject("Incorrect password or email");
+          return Promise.reject(new Error("Incorrect password or email"));
         }
         return user; // Only return user if password matches
       });
