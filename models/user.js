@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const { JWT_SECRET } = require("../utils/config");
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -19,6 +18,7 @@ const userSchema = new mongoose.Schema({
     required: [true, "The password field is required."],
     select: false,
     //This way, the user's password hash won't be
+
     // returned from the database by default.
   },
   name: {

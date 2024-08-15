@@ -1,5 +1,8 @@
-const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
+const User = require("../models/user");
+
 const {
   invalidData400,
   unauthorizedReq401,
@@ -7,8 +10,6 @@ const {
   defaultError500,
   requestConflict409,
 } = require("../utils/errors");
-const { JWT_SECRET } = require("../utils/config");
-const jwt = require("jsonwebtoken");
 
 const createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -37,9 +38,9 @@ const createUser = async (req, res) => {
 
     // Create the new user with the hashed password
     const newUser = await User.create({
-      name: name,
-      avatar: avatar,
-      email: email,
+      name,
+      avatar,
+      email,
       password: hashedPassword,
     });
 
@@ -119,7 +120,7 @@ const getCurrentUser = (req, res) => {
       return res.status(200).send(user);
     });
   } catch (error) {
-    if (err.message === "Incorrect password or email") {
+    if (error.message === "Incorrect password or email") {
       return res
         .status(unauthorizedReq401)
         .send({ message: "unauthorized request" });
@@ -131,16 +132,6 @@ const getCurrentUser = (req, res) => {
 };
 
 const modifyUserData = (req, res) => {
-  //This route should only allow modification of the name and
-  //avatar fields.
-  //You'll need to return an updated object in the response
-  //(using the new property). Don't forget to handle Not Found,
-  //Validation, and default server errors for these routes.
-  //Recall that you’ve already set up your user model to validate
-  //that the data used meets certain criteria. However, by default,
-  //this validation won’t be run when updating a resource.
-  //You can refer to the documentation for information on how
-  //to enable validators.
   try {
     const updates = { name: req.body.name, avatar: req.body.avatar };
 
