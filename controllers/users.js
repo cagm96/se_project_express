@@ -122,7 +122,7 @@ const modifyUserData = async (req, res) => {
       const error = new Error(
         "User ID not found this is comming from modifyUserData"
       );
-      error.statusCode = 404;
+      error.statusCode = itemNotFound404;
       throw error;
     });
 
@@ -131,12 +131,11 @@ const modifyUserData = async (req, res) => {
   } catch (error) {
     if (error.name === "ValidationError") {
       return res.status(invalidData400).send({
-        message:
-          " Authorization with non-existent email and password in the database",
+        message: "provided data is incorrect",
       });
     }
     return res
-      .status(500)
+      .status(defaultError500)
       .send({ error: "Could not update user from modifyUserData" });
   }
 };
