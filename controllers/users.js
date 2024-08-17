@@ -83,11 +83,12 @@ const login = (req, res) => {
     .catch((err) => {
       console.error("Login error:", err.name);
 
-      if (err.message === "Incorrect password or email") {
+      if (err.name === "Error") {
         return res
-          .status(unauthorizedReq401)
+          .status(invalidData400)
           .send({ message: "unauthorized request" });
       }
+
       return res.status(defaultError500).send({
         message: "Internal server error from the catch in the login controller",
       });
