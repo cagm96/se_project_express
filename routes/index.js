@@ -1,29 +1,22 @@
 const router = require("express").Router();
 
-const clothingItem = require("./clothingItem");
-
+const clothingItemRouter = require("./clothingItem");
 const userRouter = require("./users");
 
-const { invalidData404 } = require("../utils/errors");
-
-const {
-  login,
-
-  createUser,
-} = require("../controllers/users");
-
+const { itemNotFound404 } = require("../utils/errors");
 const { auth } = require("../middlewares/auth");
+const { login, createUser } = require("../controllers/users");
 
 router.use("/users", auth, userRouter);
 
-router.use("/items", clothingItem);
+router.use("/items", clothingItemRouter);
 
 router.post("/signin", login);
 
 router.post("/signup", createUser);
 
 router.use((req, res) => {
-  res.status(invalidData404).send({ message: "Router not found " });
+  res.status(itemNotFound404).send({ message: "Router not found " });
 });
 
 module.exports = router;

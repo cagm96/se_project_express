@@ -82,12 +82,6 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error("Login error:", err.name);
-      if (err.name === "Error") {
-        return res.status(invalidData400).send({
-          message:
-            " Authorization with non-existent email and password in the database",
-        });
-      }
 
       if (err.message === "Incorrect password or email") {
         return res
@@ -111,11 +105,6 @@ const getCurrentUser = async (req, res) => {
     console.log(user);
     return res.status(200).send(user);
   } catch (error) {
-    if (error.message === "Incorrect password or email") {
-      return res
-        .status(unauthorizedReq401)
-        .send({ message: "unauthorized request" });
-    }
     return res
       .status(defaultError500)
       .send({ error: "Could not find user from getCurrentUser controller " });
