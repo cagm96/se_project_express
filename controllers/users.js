@@ -8,6 +8,7 @@ const {
   itemNotFound404,
   defaultError500,
   requestConflict409,
+  unauthorizedReq401,
 } = require("../utils/errors");
 
 const createUser = async (req, res) => {
@@ -80,11 +81,11 @@ const login = (req, res) => {
       res.status(200).send({ token });
     })
     .catch((err) => {
-      console.error("Login error:", err.name);
+      console.error("Login error:", err.message);
 
       if (err.message === "Incorrect password or email") {
         return res
-          .status(invalidData400)
+          .status(unauthorizedReq401)
           .send({ message: "unauthorized request" });
       }
 
