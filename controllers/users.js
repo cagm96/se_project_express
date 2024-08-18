@@ -5,7 +5,6 @@ const User = require("../models/user");
 
 const {
   invalidData400,
-  unauthorizedReq401,
   itemNotFound404,
   defaultError500,
   requestConflict409,
@@ -83,7 +82,7 @@ const login = (req, res) => {
     .catch((err) => {
       console.error("Login error:", err.name);
 
-      if (err.name === "Error") {
+      if (err.message === "Incorrect password or email") {
         return res
           .status(invalidData400)
           .send({ message: "unauthorized request" });
@@ -130,6 +129,9 @@ const modifyUserData = async (req, res) => {
     console.log("updated User from modifyUserData", updatedUser);
     return res.status(200).send(updatedUser);
   } catch (error) {
+    if (error.statusCode === 404) {
+      return res.status(error).send({ message: error.message });
+    }
     if (error.name === "ValidationError") {
       return res.status(invalidData400).send({
         message: "provided data is incorrect",
