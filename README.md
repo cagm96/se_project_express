@@ -70,3 +70,7 @@ Techniques and Best Practices
     - Ensure that all tests pass before merging code changes.
 
 By following these steps and utilizing the listed technologies and techniques, you will develop a robust backend server for the WTWR project, complete with API endpoints, user authentication, and thorough testing.
+
+
+
+it worked!
