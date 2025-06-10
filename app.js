@@ -15,7 +15,7 @@ mongoose
   })
   .catch((e) => console.error(e));
 mongoose.set("strictQuery", true);
-
+app.use(cors());
 app.use(express.json());
 
 app.use("/", indexRouter);
